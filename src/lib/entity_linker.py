@@ -38,8 +38,10 @@ class EntityLinker(object):
             sentences = sentence_detector.tokenize(doc['content'])
             yield dict([('id', doc['id']), 
                         ('content', doc['content']),
+                        ('original', doc['original']),
                         ('sentences', sentences),
-                        ('path', doc['path'])])
+                        ('path', doc['path']),
+                        ('timestamp', doc['timestamp'])])
 
 
     def gen_build_snippets(self,data):
@@ -63,9 +65,11 @@ class EntityLinker(object):
             snippet_list.append(snippet)
             yield dict([('id', doc['id']), 
                         ('content', doc['content']),
+                        ('original', doc['original']),
                         ('sentences', doc['sentences']),
                         ('snippets', snippet_list),
-                        ('path', doc['path'])])
+                        ('path', doc['path']),
+                        ('timestamp', doc['timestamp'])])
             
 
     def gen_tag_snippets(self, data):
@@ -98,6 +102,8 @@ class EntityLinker(object):
                     print(doc['path'])
             yield dict([('id', doc['id']), 
                         ('content', doc['content']),
+                        ('original', doc['original']),
                         ('snippets', tagged_snippets),
                         ('sentences', doc['sentences']),
-                        ('path', doc['path'])])
+                        ('path', doc['path']),
+                        ('timestamp', doc['timestamp'])])

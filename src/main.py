@@ -25,7 +25,7 @@ def main():
     if s.DATA_IS_INSERTED == False:
         print("[INFO] Data is not inserted; Running whole pipeline")
         database_connection = DatabaseConnection(s.DB_HOST, s.DB_SCHEMA_NAME, s.DB_USER, s.DB_PASSWORD, s.CREATE_SCHEMA)
-        data = data_importer.gen_read_data();
+        data = data_importer.gen_read_threads();
         data = entity_linker.gen_split_into_sentences(data)
         data = entity_linker.gen_build_snippets(data)
         data = entity_linker.gen_tag_snippets(data)

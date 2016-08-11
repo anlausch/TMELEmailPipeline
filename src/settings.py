@@ -5,13 +5,13 @@ Created on 29.03.2016
 
 This file contains some general settings
 '''
-DATA_PATH= 'C:\\Users\\D056937\\Desktop\\Masterthesis\\hillary_fede\\output_fede'
+DATA_PATH= 'C:\\Users\\D056937\\Desktop\\Masterthesis\\EnronThreadsCorpus\\ETC_06082013'
 TAGME_KEY = 'f13bacba-d11b-4402-9543-eca22cad3601'
 TAGME_URL = 'https://tagme.d4science.org/tagme/tag'
 TOKENIZER = 'tokenizers/punkt/english.pickle'
 NUMBER_DOCS = 500# -1 for all emails
 RHO_THRESHOLD = 0.15
-DB_SCHEMA_NAME = "testpipeline"
+DB_SCHEMA_NAME = "emailpipeline"
 DB_USER = "root"
 DB_PASSWORD="root"
 DB_HOST="localhost"

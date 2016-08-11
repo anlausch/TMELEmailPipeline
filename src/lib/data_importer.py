@@ -13,7 +13,6 @@ class DataImporter(object):
     This class is for importing textual data from the file system
     '''
 
-
     def __init__(self, path, number_docs):
         '''
         Constructor
@@ -25,7 +24,10 @@ class DataImporter(object):
     
     
     def filter_web_addresses(self, line):
-        # filter web addresses
+        '''
+        Filters out web addresses using a regex pattern and saves them into a file
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_web_address = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         matches = re.findall(p_web_address, line)
         if len(matches) > 0:
@@ -38,8 +40,12 @@ class DataImporter(object):
                     log.write("\n")
         return line
     
+    
     def filter_image_artefacts(self, line):
-        # filter image artefacts
+        '''
+        Filters out image artefacts using a regex pattern and saves them into a file
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_image = '\[IMAGE\]'
         matches = re.findall(p_image, line)
         if len(matches) > 0:
@@ -54,7 +60,10 @@ class DataImporter(object):
     
     
     def filter_email_addresses(self, line):
-        # filter email addresses
+        '''
+        Filters out email addresses using a regex pattern and saves them into a file
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_email_address = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\s)|([a-zA-Z0-9_.+-\/]+@[a-zA-Z0-9-]+\.?.[a-zA-Z0-9-.]+)'
         matches = re.findall(p_email_address, line)
         if len(matches) > 0:
@@ -69,7 +78,10 @@ class DataImporter(object):
     
     
     def filter_dates(self, line):
-        # filter dates
+        '''
+        Filters out dates using a regex pattern and saves them into a file
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_date = '\d{1,2}\/\d{1,2}\/\d{4}'
         matches = re.findall(p_date, line)
         if len(matches) > 0:
@@ -84,13 +96,22 @@ class DataImporter(object):
     
     
     def filter_noise(self, line):
+        '''
+        Filters out noise by calling several functions that use regex patterns
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         line = self.filter_web_addresses(line)
         line = self.filter_email_addresses(line)
         line = self.filter_dates(line)
         line = self.filter_image_artefacts(line)
         return line
     
+    
     def get_thread_id(self, line):
+        '''
+        Returns the thread id using a regex pattern
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_threadid = re.compile('ThreadID: ([0-9]+)')
         matches = re.findall(p_threadid, line)
         if len(matches) > 0:
@@ -98,7 +119,12 @@ class DataImporter(object):
         else:
             return ""
     
+    
     def get_subject(self, line):
+        '''
+        Returns the subject using a regex pattern
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_subject = re.compile('Subject: (.*)')
         matches = re.findall(p_subject, line)
         if len(matches) > 0:
@@ -106,12 +132,18 @@ class DataImporter(object):
             return subject
         else:
             return ""
-        
+    
+    
     def get_date_sent(self, line):
+        '''
+        Returns the sent date using a regex pattern
+        @param {String} line: input string to which the filter shall be applied 
+        '''
         p_date = re.compile('Date: (.*)\\r')
         matches = re.findall(p_date, line)
         if len(matches) > 0:
-            date = parser.parse(matches[0])
+            dateparser = parser()
+            date = dateparser.parse(matches[0])
             return date
         else:
             return ""
@@ -119,7 +151,8 @@ class DataImporter(object):
     
     def gen_read_threads(self):
         '''
-        Generator that reads threads from the file system and yields them
+        Generator that reads threads from the file system, 
+        applies several filters and yields the textual data
         '''
         data = dict();
         for root, dirs, files in os.walk(self.path):  # @UnusedVariable
@@ -129,12 +162,12 @@ class DataImporter(object):
             if (len(files) > 0 and len(data) < self.number_docs) or (self.number_docs==-1 and len(files) > 0):
                 for f in files:
                     try:
-                        if (len(data) < self.number_docs and ".original" in f) or (self.number_emails==-1 and ".original" in f):
+                        if (len(data) < self.number_docs and ".original" in f) or (self.number_docs==-1 and ".original" in f):
                             original = codecs.open(os.path.join(root, f), "r", "utf-8").read()
                             thread_id = self.get_thread_id(original)
                             thread_date = self.get_date_sent(original)
                             thread_content += self.get_subject(original)
-                        elif (len(data) < self.number_emails and not ".original" in f) or (self.number_emails==-1 and not ".original" in f):
+                        elif (len(data) < self.number_docs and not ".original" in f) or (self.number_docs==-1 and not ".original" in f):
                             file_data_lines = codecs.open(os.path.join(root, f), "r", "utf-8").readlines()
                             is_body = False
                             for line in file_data_lines:
@@ -143,14 +176,14 @@ class DataImporter(object):
                                     thread_content += line
                                 if self.get_thread_id(line) != "":
                                     is_body = True
-                        elif len(data) == self.number_emails:
+                        elif len(data) == self.number_docs:
                             return
                     except Exception as e:
                         print("[ERROR] %s" % e)
                         break;
                 if thread_id != "":
-                    yield dict([('content', thread_content), ('path', root), ('original', original), ('timestamp', thread_date)])
+                    yield dict([('id', thread_id), ('content', thread_content), ('path', root), ('original', original), ('timestamp', thread_date)])
                     data[thread_id] = ""
-            elif len(data) >= self.number_emails and self.number_emails != -1:
+            elif len(data) >= self.number_docs and self.number_docs != -1:
                 return
         return

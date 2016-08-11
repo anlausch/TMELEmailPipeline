@@ -1,4 +1,4 @@
-# TMELPipeline
+# TMELEmailPipeline
 Documentation for all modules can be found here:
 
 http://htmlpreview.github.io/?https://github.com/anlausch/TMELPipeline/blob/master/docs/data_importer.html

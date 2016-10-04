@@ -23,110 +23,110 @@ class DataImporter(object):
         self.number_docs = number_docs
     
     
-    def filter_web_addresses(self, line):
+    def filter_urls(self, s):
         '''
         Filters out web addresses using a regex pattern and saves them into a file
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_web_address = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-        matches = re.findall(p_web_address, line)
+        matches = re.findall(p_web_address, s)
         if len(matches) > 0:
             with open(".\\..\\output\\web_addresses.log", "a") as log:
                 for match in matches:
                     for group in match:
                         if group != "" and group != " ":
                             log.write(group)
-                            line = line.replace(group, " _ ")
+                            s = s.replace(group, " _ ")
                     log.write("\n")
-        return line
+        return s
     
     
-    def filter_image_artefacts(self, line):
+    def filter_image_artefacts(self, s):
         '''
         Filters out image artefacts using a regex pattern and saves them into a file
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_image = '\[IMAGE\]'
-        matches = re.findall(p_image, line)
+        matches = re.findall(p_image, s)
         if len(matches) > 0:
             with open(".\\..\\output\\images.log", "a") as log:
                 for match in matches:
                     for group in match:
                         if group != "" and group != " ":
                             log.write(group)
-                            line = line.replace(group, " _ ")
+                            s = s.replace(group, " _ ")
                     log.write("\n")
-        return line
+        return s
     
     
-    def filter_email_addresses(self, line):
+    def filter_email_addresses(self, s):
         '''
         Filters out email addresses using a regex pattern and saves them into a file
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_email_address = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\s)|([a-zA-Z0-9_.+-\/]+@[a-zA-Z0-9-]+\.?.[a-zA-Z0-9-.]+)'
-        matches = re.findall(p_email_address, line)
+        matches = re.findall(p_email_address, s)
         if len(matches) > 0:
             with open(".\\..\\output\\email_addresses.log", "a+") as log:
                 for match in matches:
                     for group in match:
                         if group != "":
                             log.write(group. replace('\n', ''))
-                            line = line.replace(group, " _ ")
+                            s = s.replace(group, " _ ")
                     log.write("\n")
-        return line
+        return s
     
     
-    def filter_dates(self, line):
+    def filter_dates(self, s):
         '''
         Filters out dates using a regex pattern and saves them into a file
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_date = '\d{1,2}\/\d{1,2}\/\d{4}'
-        matches = re.findall(p_date, line)
+        matches = re.findall(p_date, s)
         if len(matches) > 0:
             with open(".\\..\\output\\dates.log", "a") as log:
                 for match in matches:
                     for group in match:
                         if group != "":
                             log.write(group)
-                            line = line.replace(group, " _ ")
+                            s = s.replace(group, " _ ")
                     log.write("\n")
-        return line
+        return s
     
     
-    def filter_noise(self, line):
+    def filter_noise(self, s):
         '''
         Filters out noise by calling several functions that use regex patterns
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
-        line = self.filter_web_addresses(line)
-        line = self.filter_email_addresses(line)
-        line = self.filter_dates(line)
-        line = self.filter_image_artefacts(line)
-        return line
+        s = self.filter_urls(s)
+        s = self.filter_email_addresses(s)
+        s = self.filter_dates(s)
+        s = self.filter_image_artefacts(s)
+        return s
     
     
-    def get_thread_id(self, line):
+    def get_thread_id(self, s):
         '''
         Returns the thread id using a regex pattern
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_threadid = re.compile('ThreadID: ([0-9]+)')
-        matches = re.findall(p_threadid, line)
+        matches = re.findall(p_threadid, s)
         if len(matches) > 0:
             return matches[0]
         else:
             return ""
     
     
-    def get_subject(self, line):
+    def get_subject(self, s):
         '''
         Returns the subject using a regex pattern
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_subject = re.compile('Subject: (.*)')
-        matches = re.findall(p_subject, line)
+        matches = re.findall(p_subject, s)
         if len(matches) > 0:
             subject = matches[0].replace('Re: ', '').replace('RE: ','').replace('Fw: ', '').replace('FW: ','').replace('Fwd: ','').replace('FWD: ','')
             return subject
@@ -134,13 +134,13 @@ class DataImporter(object):
             return ""
     
     
-    def get_date_sent(self, line):
+    def get_date_sent(self, s):
         '''
         Returns the sent date using a regex pattern
-        @param {String} line: input string to which the filter shall be applied 
+        @param {String} s: input string to which the filter shall be applied 
         '''
         p_date = re.compile('Date: (.*)\\r')
-        matches = re.findall(p_date, line)
+        matches = re.findall(p_date, s)
         if len(matches) > 0:
             dateparser = parser()
             date = dateparser.parse(matches[0])
